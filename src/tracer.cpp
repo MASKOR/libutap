@@ -203,13 +203,18 @@ istream& skipspaces(istream& is)
     return is;
 }
 
+#define LIBUTAP_NAME_SIZE 32767
+#define LIBUTAP_PPSTR2(x) #x
+#define LIBUTAP_PPSTR(x) LIBUTAP_PPSTR2(x)
+#define LIBUTAP_NAME_SIZE_S LIBUTAP_PPSTR(LIBUTAP_NAME_SIZE)
+
 /* Parser for intermediate format.
  */
 void loadIF(istream& file)
 {
     string str;
     string section;
-    char name[32];
+    char name[LIBUTAP_NAME_SIZE];
     int index;
 
     while (getline(file, section))
@@ -222,7 +227,7 @@ void loadIF(istream& file)
                 char s[5];
                 auto cstr = str.c_str();
 
-                if (sscanf(cstr, "%d:clock:%d:%31s", &index,
+                if (sscanf(cstr, "%d:clock:%d:%" LIBUTAP_NAME_SIZE_S "s", &index,
                            &cell.clock.nr, name) == 3)
                 {
                     cell.type = cell_t::CLOCK;
@@ -235,7 +240,7 @@ void loadIF(istream& file)
                 {
                     cell.type = cell_t::CONST;
                 }
-                else if (sscanf(cstr, "%d:var:%d:%d:%d:%d:%31s", &index,
+                else if (sscanf(cstr, "%d:var:%d:%d:%d:%d:%" LIBUTAP_NAME_SIZE_S "s", &index,
                                 &cell.var.min, &cell.var.max, &cell.var.init,
                                 &cell.var.nr, name) == 6)
                 {
@@ -244,7 +249,7 @@ void loadIF(istream& file)
                     variables.emplace_back(name);
                     variableCount++;
                 }
-                else if (sscanf(cstr, "%d:meta:%d:%d:%d:%d:%31s", &index,
+                else if (sscanf(cstr, "%d:meta:%d:%d:%d:%d:%" LIBUTAP_NAME_SIZE_S "s", &index,
                                 &cell.meta.min, &cell.meta.max, &cell.meta.init,
                                 &cell.meta.nr, name) == 6)
                 {
@@ -253,31 +258,31 @@ void loadIF(istream& file)
                     variables.emplace_back(name);
                     variableCount++;
                 }
-                else if (sscanf(cstr, "%d:sys_meta:%d:%d:%31s", &index,
+                else if (sscanf(cstr, "%d:sys_meta:%d:%d:%" LIBUTAP_NAME_SIZE_S "s", &index,
                                 &cell.sys_meta.min, &cell.sys_meta.max, name) == 4)
                 {
                     cell.type = cell_t::SYS_META;
                     cell.name = name;
                 }
-                else if (sscanf(cstr, "%d:location::%31s", &index, name) == 2)
+                else if (sscanf(cstr, "%d:location::%" LIBUTAP_NAME_SIZE_S "s", &index, name) == 2)
                 {
                     cell.type = cell_t::LOCATION;
                     cell.location.flags = cell_t::NONE;
                     cell.name = name;
                 }
-                else if (sscanf(cstr, "%d:location:committed:%31s", &index, name) == 2)
+                else if (sscanf(cstr, "%d:location:committed:%" LIBUTAP_NAME_SIZE_S "s", &index, name) == 2)
                 {
                     cell.type = cell_t::LOCATION;
                     cell.location.flags = cell_t::COMMITTED;
                     cell.name = name;
                 }
-                else if (sscanf(cstr, "%d:location:urgent:%31s", &index, name) == 2)
+                else if (sscanf(cstr, "%d:location:urgent:%" LIBUTAP_NAME_SIZE_S "s", &index, name) == 2)
                 {
                     cell.type = cell_t::LOCATION;
                     cell.location.flags = cell_t::URGENT;
                     cell.name = name;
                 }
-                else if (sscanf(cstr, "%d:static:%d:%d:%31s", &index,
+                else if (sscanf(cstr, "%d:static:%d:%d:%" LIBUTAP_NAME_SIZE_S "s", &index,
                                 &cell.fixed.min, &cell.fixed.max,
                                 name) == 4)
                 {
@@ -350,7 +355,7 @@ void loadIF(istream& file)
             while (read(file, str) && !str.empty() && !isspace(str[0]))
             {
                 process_t process;
-                if (sscanf(str.c_str(), "%d:%d:%31s",
+                if (sscanf(str.c_str(), "%d:%d:%" LIBUTAP_NAME_SIZE_S "s",
                            &index, &process.initial, name) != 3)
                 {
                     throw invalid_format("In process section");
